@@ -1,0 +1,19 @@
+### C ###
+# Object files
+*.o
+*.ko
+
+# Libraries
+*.a
+*.la
+*.lo
+
+# Shared objects
+*.so
+*.so.*
+
+### Gcov ###
+# gcc coverage testing tool files
+*.gcno
+*.gcda
+*.gcov
