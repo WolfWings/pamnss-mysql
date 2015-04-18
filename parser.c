@@ -64,8 +64,6 @@ void parse_config(char *filename) {
 	letter l;
 	size_t filesize;
 
-	bzero(&options, sizeof(options));
-
 	filesize = getFilesize(filename);
 
 	/* Open file */
@@ -84,20 +82,18 @@ void parse_config(char *filename) {
 
 	name = value = NULL;
 	nameStart = nameStop = valueStart = valueStop = pos = 0;
-	lineR = lineN = 1;
-	lineC = 0;
+	lineR = lineN = lineC = 1;
 	state = STATE_SOL;
 	do {
-		lineC++;
 		switch(config[pos]) {
 			case '\r':
 				lineR++;
-				lineC = 0;
+				lineC = 1;
 				l = LETTER_EOL;
 				break;
 			case '\n':
 				lineN++;
-				lineC = 0;
+				lineC = 1;
 				l = LETTER_EOL;
 				break;
 			case ' ':
@@ -115,100 +111,94 @@ void parse_config(char *filename) {
 				 || (config[pos] > '~')) {
 					l = LETTER_INVALID;
 					parser_error("valid character", "invalid character", min(lineR, lineN), lineC);
-					goto abort_parse;
+					state = STATE_COMMENT;
+					break;
 				}
 				l = LETTER_LETTER;
 				break;
 		}
 
 		switch(state) {
+		case STATE_COMMENT: switch(l) {
+			case LETTER_EOL:
+				state = STATE_SOL;
+				break;
+			default:
+				break;
+			} break;
 		case STATE_SOL: switch(l) {
 			case LETTER_EOL:
 			case LETTER_WHITESPACE:
-				pos++;
 				break;
 			case LETTER_EQUAL:
 				parser_error("option name", "=", min(lineR, lineN), lineC);
-				goto abort_parse;
+				state = STATE_COMMENT;
+				break;
 			case LETTER_COMMENT:
 				state = STATE_COMMENT;
-				pos++;
 				break;
 			case LETTER_LETTER:
 			default:
 				nameStart = pos;
 				nameStop = pos;
 				state = STATE_NAME;
-				pos++;
 				break;
-			} break;
-		case STATE_COMMENT: switch(l) {
-			case LETTER_EOL:
-				pos++;
-				state = STATE_SOL;
-				break;
-			default:
-				pos++;
 			} break;
 		case STATE_NAME: switch(l) {
 			case LETTER_EOL:
 				parser_error("=", "end of line", min(lineR, lineN), lineC);
-				goto abort_parse;
+				state = STATE_COMMENT;
+				break;
 			case LETTER_WHITESPACE:
 				state = STATE_PRE_EQUAL;
-				pos++;
 				break;
 			case LETTER_EQUAL:
 				state = STATE_POST_EQUAL;
-				pos++;
 				break;
 			case LETTER_COMMENT:
 				parser_error("=", "comment", min(lineR, lineN), lineC);
-				goto abort_parse;
+				state = STATE_COMMENT;
+				break;
 			case LETTER_LETTER:
 			default:
 				nameStop = pos;
-				pos++;
 				break;
 			} break;
 		case STATE_PRE_EQUAL: switch(l) {
 			case LETTER_WHITESPACE:
-				pos++;
 				break;
 			case LETTER_EQUAL:
 				state = STATE_POST_EQUAL;
-				pos++;
 				break;
 			default:
 				parser_error("= or more whitespace", "gibberish", min(lineR, lineN), lineC);
-				goto abort_parse;
+				state = STATE_COMMENT;
+				break;
 			} break;
 		case STATE_POST_EQUAL: switch(l) {
 			case LETTER_EOL:
 				parser_error("option value or more whitespace", "end of line", min(lineR, lineN), lineC);
-				goto abort_parse;
+				state = STATE_COMMENT;
+				break;
 			case LETTER_WHITESPACE:
-				pos++;
 				break;
 			case LETTER_EQUAL:
 			case LETTER_COMMENT:
 			case LETTER_LETTER:
 			default:
-				state = STATE_VALUE;
 				valueStart = pos;
 				valueStop = pos;
-				pos++;
+				state = STATE_VALUE;
 				break;
 			} break;
 		case STATE_VALUE: switch(l) {
 			case LETTER_EOL:
-				state = STATE_SOL;
-				pos++;
 				name = strndup((char *)config + nameStart, nameStop - nameStart + 1);
 				value = strndup((char *)config + valueStart, valueStop - valueStart + 1);
 				option_set(name, value);
 				free(name);
 				free(value);
+				state = STATE_SOL;
 				break;
 			case LETTER_WHITESPACE:
 			case LETTER_EQUAL:
@@ -216,10 +206,11 @@ void parse_config(char *filename) {
 			case LETTER_LETTER:
 			default:
 				valueStop = pos;
-				pos++;
 				break;
 			} break;
 		}
+		pos++;
+		lineC++;
 	} while (pos < filesize);
 
 	/* End-of-File handling. */
@@ -241,7 +232,6 @@ void parse_config(char *filename) {
 
 	/* Cleanup */
 
-abort_parse:
 	munmap(config, filesize);
 
 abort_mmap:

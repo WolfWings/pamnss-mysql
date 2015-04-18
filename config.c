@@ -5,7 +5,16 @@
 
 #include "config.h"
 
-_options options;
+#ifndef min
+#define min(a, b) ((a < b) ? a : b)
+#endif
+
+_options options = {{NULL,NULL,{NULL,NULL},{NULL,NULL},{NULL,NULL}},{NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},{NULL,NULL,NULL}};
+
+/*
+ * When importing a new config-state limit any value to at most 4k.
+ * Also means we free the old strings once replaced.
+ */
 
 static void updatestring(void *old, const char *new) {
 	char *temp = *((char **)old);
@@ -23,7 +32,7 @@ static void updatecredentials(void *old, const char *new) {
 		return;
 	}
 	temp = *((_logincreds *)old);
-	((_logincreds *)old)->username = strndup(new, split - new);
+	((_logincreds *)old)->username = strndup(new, min(split - new, 4095));
 	((_logincreds *)old)->password = strndup(split + 1, 4095);
 	if (temp.username != NULL) {
 		free(temp.username);
@@ -33,6 +42,11 @@ static void updatecredentials(void *old, const char *new) {
 	}
 }
 
+/*
+ * A very basic 'linear search' to populate the options-structure.
+ * Could be sped up greatly with a Finite Automata/Radix-Tree based
+ * string matching algorithm but this is much more maintainable.
+ */
 typedef struct {
 	char *name;
 	void *destination;
