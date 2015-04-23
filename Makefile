@@ -3,13 +3,13 @@
 CFLAGS=-I. -O0 -Wall -pedantic -fprofile-arcs -ftest-coverage
 LDFLAGS=
 
-default: test_parser
+default: tests/parser_coverage
 
-test_parser: parser.o config.o test_parser.c
+tests/parser_coverage: parser.o config.o tests/parser_coverage.c
 
 parser.c: config.h
 
 config.c: config.h
 
 clean:
-	$(RM) *.o *.gcda *.gcno *.gcov test_parser
+	$(RM) *.o *.gcda *.gcno *.gcov tests/*_coverage

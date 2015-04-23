@@ -23,9 +23,9 @@ INSERT INTO users (name,homedir,password) VALUES ('sqltest','/dev/null',ENCRYPT(
 INSERT INTO grouplist (gid,username) VALUES(5000,'sqltest');
 
 # The permissions ...
-GRANT USAGE ON *.* TO `pam-root`@`%` IDENTIFIED BY 'A';
-GRANT USAGE ON *.* TO `nss-root`@`%` IDENTIFIED BY 'A';
-GRANT USAGE ON *.* TO `nss-user`@`%` IDENTIFIED BY 'A';
+GRANT USAGE ON *.* TO `pam-root`@`%` IDENTIFIED BY 'password';
+GRANT USAGE ON *.* TO `nss-root`@`%` IDENTIFIED BY 'password';
+GRANT USAGE ON *.* TO `nss-user`@`%` IDENTIFIED BY 'password';
 
 GRANT SELECT (`name`, `password`)
              ON `pamnss`.`users`
