@@ -1,6 +1,6 @@
-#CFLAGS=-I. -Os -march=native
+#CFLAGS=-I. -Os -march=native -std=gnu99
 #LDFLAGS=-s
-CFLAGS=-I. -O0 -Wall -pedantic -fprofile-arcs -ftest-coverage
+CFLAGS=-I. -O0 -Wall -pedantic -fprofile-arcs -ftest-coverage -std=gnu99
 LDFLAGS=
 
 default: tests/parser_coverage
