@@ -8,8 +8,8 @@
 
 #include "config.h"
 
-#ifndef min
-#define min(a, b) ((a < b) ? a : b)
+#ifndef max
+#define max(a, b) ((a > b) ? a : b)
 #endif
 
 typedef enum {
@@ -110,7 +110,7 @@ void parse_config(char *filename) {
 				if ((config[pos] < ' ')
 				 || (config[pos] > '~')) {
 					l = LETTER_INVALID;
-					parser_error("valid character", "invalid character", min(lineR, lineN), lineC);
+					parser_error("valid character", "invalid character", max(lineR, lineN), lineC);
 					state = STATE_COMMENT;
 					break;
 				}
@@ -131,7 +131,7 @@ void parse_config(char *filename) {
 			case LETTER_WHITESPACE:
 				break;
 			case LETTER_EQUAL:
-				parser_error("option name", "=", min(lineR, lineN), lineC);
+				parser_error("option name", "=", max(lineR, lineN), lineC);
 				state = STATE_COMMENT;
 				break;
 			case LETTER_COMMENT:
@@ -146,7 +146,7 @@ void parse_config(char *filename) {
 			} break;
 		case STATE_NAME: switch(l) {
 			case LETTER_EOL:
-				parser_error("=", "end of line", min(lineR, lineN), lineC);
+				parser_error("=", "end of line", max(lineR, lineN), lineC);
 				state = STATE_COMMENT;
 				break;
 			case LETTER_WHITESPACE:
@@ -156,7 +156,7 @@ void parse_config(char *filename) {
 				state = STATE_POST_EQUAL;
 				break;
 			case LETTER_COMMENT:
-				parser_error("=", "comment", min(lineR, lineN), lineC);
+				parser_error("=", "comment", max(lineR, lineN), lineC);
 				state = STATE_COMMENT;
 				break;
 			case LETTER_LETTER:
@@ -171,13 +171,13 @@ void parse_config(char *filename) {
 				state = STATE_POST_EQUAL;
 				break;
 			default:
-				parser_error("= or more whitespace", "gibberish", min(lineR, lineN), lineC);
+				parser_error("= or more whitespace", "gibberish", max(lineR, lineN), lineC);
 				state = STATE_COMMENT;
 				break;
 			} break;
 		case STATE_POST_EQUAL: switch(l) {
 			case LETTER_EOL:
-				parser_error("option value or more whitespace", "end of line", min(lineR, lineN), lineC);
+				parser_error("option value or more whitespace", "end of line", max(lineR, lineN), lineC);
 				state = STATE_COMMENT;
 				break;
 			case LETTER_WHITESPACE:
@@ -217,10 +217,10 @@ void parse_config(char *filename) {
 	switch(state) {
 	case STATE_NAME:
 	case STATE_PRE_EQUAL:
-		parser_error("=", "end of file", min(lineR, lineN), lineC);
+		parser_error("=", "end of file", max(lineR, lineN), lineC);
 		break;
 	case STATE_POST_EQUAL:
-		parser_error("option value", "end of file", min(lineR, lineN), lineC);
+		parser_error("option value", "end of file", max(lineR, lineN), lineC);
 		break;
 	case STATE_SOL:
 	case STATE_COMMENT:

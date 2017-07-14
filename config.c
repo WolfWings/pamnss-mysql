@@ -9,7 +9,30 @@
 #define min(a, b) ((a < b) ? a : b)
 #endif
 
-_options options = {{NULL,NULL,{NULL,NULL},{NULL,NULL},{NULL,NULL}},{NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL},{NULL,NULL,NULL}};
+/* C99 style initialization */
+_options options = {
+	.db.host = NULL
+,	.db.database = NULL
+,	.db.pam.username = NULL
+,	.db.pam.password = NULL
+,	.db.nssuser.username = NULL
+,	.db.nssuser.password = NULL
+,	.db.nssroot.username = NULL
+,	.db.nssroot.password = NULL
+,	.nss.getpwent = NULL
+,	.nss.getpwnam = NULL
+,	.nss.getpwuid = NULL
+,	.nss.getspent = NULL
+,	.nss.getspnam = NULL
+,	.nss.getgrent = NULL
+,	.nss.getgrnam = NULL
+,	.nss.getgrgid = NULL
+,	.nss.memsbygid = NULL
+,	.nss.gidsbymem = NULL
+,	.pam.table = NULL
+,	.pam.usernamecolumn = NULL
+,	.pam.passwordcolumn = NULL
+};
 
 /*
  * When importing a new config-state limit any value to at most 4k.

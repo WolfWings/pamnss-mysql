@@ -34,5 +34,11 @@ int main(int argc, char **argv) {
 	printf("pam.table = %s\n", string(options.pam.table));
 	printf("pam.usernamecolumn = %s\n", string(options.pam.usernamecolumn));
 	printf("pam.passwordcolumn = %s\n", string(options.pam.passwordcolumn));
+
+	/* Avoid ValGrind leak alerts */
+	if (options.db.host != NULL)		free(options.db.host);
+	if (options.db.pam.username != NULL)	free(options.db.pam.username);
+	if (options.db.pam.password != NULL)	free(options.db.pam.password);
+
 	return 0;
 }
