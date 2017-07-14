@@ -8,4 +8,5 @@ umask -- -r
 TEMPFILE=$(mktemp)
 umask ${OLDUMASK}
 ${EXE} ${TEMPFILE}
+rm -f ${TEMPFILE}
 gcov *.c

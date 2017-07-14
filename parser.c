@@ -39,7 +39,7 @@ static size_t getFilesize(const char* filename) {
 static void parser_error(const char *expect, const char *got, int lineline, int linechar) {
 	char buffer[1024];
 	snprintf(buffer, 1024, "Expected %s but got %s at line %i, character %i\n", expect, got, lineline, linechar);
-	if (write(1, buffer, strlen(buffer)) != -1) {
+	if (write(STDERR_FILENO, buffer, strlen(buffer)) != -1) {
 		fsync(1);
 	}
 }
