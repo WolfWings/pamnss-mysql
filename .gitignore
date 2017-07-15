@@ -17,3 +17,6 @@
 *.gcno
 *.gcda
 *.gcov
+
+# Executables
+tests/parser_coverage
