@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "config.h"
-#include "parser.h"
+#include "../config.h"
+#include "../parser.h"
 
 char *empty = "[NULL]";
 

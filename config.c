@@ -41,25 +41,30 @@ _options options = {
 
 static void updatestring(void *old, const char *new) {
 	char *temp = *((char **)old);
+
 	*((char **)old) = strndup(new, 4095);
+
 	if (temp != NULL) {
 		free(temp);
 	}
 }
 
 static void updatecredentials(void *old, const char *new) {
-	char *split;
 	_logincreds temp;
-	split = index(new, ':');
+	char *split = index(new, ':');
+
 	if (split == NULL) {
 		return;
 	}
+
 	temp = *((_logincreds *)old);
 	((_logincreds *)old)->username = strndup(new, min(split - new, 4095));
 	((_logincreds *)old)->password = strndup(split + 1, 4095);
+
 	if (temp.username != NULL) {
 		free(temp.username);
 	}
+
 	if (temp.password != NULL) {
 		free(temp.password);
 	}

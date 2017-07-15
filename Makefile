@@ -9,9 +9,11 @@ MY_LDLIBS=
 # MySQL includes and libraries
 # Enforce "gnu99" C99 mode
 # Include local directory
-CFLAGS=$(MY_CFLAGS) $(shell mysql_config --cflags) -fPIC -I. -std=gnu99
+CFLAGS=$(MY_CFLAGS) $(shell mysql_config --cflags) -fPIC -std=gnu99
 LDLIBS=$(MY_LDLIBS) $(shell mysql_config --libs)
 LDFLAGS=$(MY_LDFLAGS)
+
+NSS_OBJS=libnss.o config.o parser.o database.o
 
 default: libnss_mysql2017.so.2
 
@@ -19,14 +21,14 @@ tests: tests/parser_coverage
 
 tests/parser_coverage: parser.o config.o tests/parser_coverage.c
 
-parser.c: config.h
+parser.c: parser.h config.h
 
 config.c: config.h
 
-mysql.c: mysql.h
+database.c: database.h
 
-libnss_mysql2017.so.2: nss.o config.o parser.o mysql.o
-	gcc -fPIC -shared -o libnss_mysql2017.so.2 -Wl,-soname,libnss_mysql2017.so.2 $<
+libnss_mysql2017.so.2: $(NSS_OBJS)
+	gcc -fPIC -shared -o libnss_mysql2017.so.2 -Wl,-soname,libnss_mysql2017.so.2 $(NSS_OBJS)
 
 clean:
 	$(RM) *.o *.gcda *.gcno *.gcov tests/*_coverage *.so.*
