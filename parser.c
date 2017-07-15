@@ -12,19 +12,23 @@
 #define max(a, b) ((a > b) ? a : b)
 #endif
 
+#ifndef min
+#define min(a, b) ((a < b) ? a : b)
+#endif
+
 typedef enum {
-	STATE_SOL
-,	STATE_COMMENT
-,	STATE_NAME
-,	STATE_PRE_EQUAL
+	STATE_START_OF_LINE
+,	STATE_COMMENT_OR_ERROR	// Ignores further data until end of line
+,	STATE_NAME		// Until the first whitespace or equal sign
+,	STATE_PRE_EQUAL		// Only if whitespace before equal sign
 ,	STATE_POST_EQUAL
-,	STATE_VALUE
+,	STATE_VALUE		// First non-whitespace after equal sign
 } state;
 
 typedef enum {
 	LETTER_INVALID
 ,	LETTER_WHITESPACE
-,	LETTER_EOL
+,	LETTER_END_OF_LINE
 ,	LETTER_EQUAL
 ,	LETTER_COMMENT
 ,	LETTER_LETTER
@@ -36,16 +40,23 @@ static size_t getFilesize(const char* filename) {
 	return st.st_size;
 }
 
+static char _parser_error_buffer[1024];
 static void parser_error(const char *expect, const char *got, int lineline, int linechar) {
-	char buffer[1024];
-	snprintf(buffer, 1024, "Expected %s but got %s at line %i, character %i\n", expect, got, lineline, linechar);
-	if (write(STDERR_FILENO, buffer, strlen(buffer)) != -1) {
-		fsync(1);
+	// Compute the total bytes written INCLUDING the nul
+	// Uses 'min' to cap things at the buffer length
+	int written = min(1 + snprintf(_parser_error_buffer, 1024,
+		"Expected %s but got %s at line %i, character %i\n",
+		expect, got, lineline, linechar), 1024);
+
+	// As we're already in error handling, silently 'eat' errors
+	if (written > 0) {
+		// ...if we write without issue...
+		if (write(STDERR_FILENO, _parser_error_buffer, written) != -1) {
+			// ...flush the data to be seen...
+			fsync(STDERR_FILENO);
+		}
 	}
 }
-
-int fileline;
-int filechar;
 
 void parse_config(char *filename) {
 	int fd
@@ -53,10 +64,11 @@ void parse_config(char *filename) {
 	  , nameStop
 	  , valueStart
 	  , valueStop
-	  , lineR
-	  , lineN
-	  , lineC
-	  , pos;
+	  , lineR	// Counting \r's
+	  , lineN	// Counting \n's
+	  , lineT	// Highest of \r's and \n's
+	  , lineC	// Character in line
+	  , pos;	// Byte position in file
 	char *name
 	   , *value
 	   , *config;
@@ -83,18 +95,20 @@ void parse_config(char *filename) {
 	name = value = NULL;
 	nameStart = nameStop = valueStart = valueStop = pos = 0;
 	lineR = lineN = lineC = 1;
-	state = STATE_SOL;
+	state = STATE_START_OF_LINE;
 	do {
 		switch(config[pos]) {
 			case '\r':
 				lineR++;
+				lineT = max(lineR, lineN);
 				lineC = 1;
-				l = LETTER_EOL;
+				l = LETTER_END_OF_LINE;
 				break;
 			case '\n':
 				lineN++;
+				lineT = max(lineR, lineN);
 				lineC = 1;
-				l = LETTER_EOL;
+				l = LETTER_END_OF_LINE;
 				break;
 			case ' ':
 			case '\t':
@@ -110,8 +124,8 @@ void parse_config(char *filename) {
 				if ((config[pos] < ' ')
 				 || (config[pos] > '~')) {
 					l = LETTER_INVALID;
-					parser_error("valid character", "invalid character", max(lineR, lineN), lineC);
-					state = STATE_COMMENT;
+					parser_error("valid character", "invalid character", lineT, lineC);
+					state = STATE_COMMENT_OR_ERROR;
 					break;
 				}
 				l = LETTER_LETTER;
@@ -119,23 +133,23 @@ void parse_config(char *filename) {
 		}
 
 		switch(state) {
-		case STATE_COMMENT: switch(l) {
-			case LETTER_EOL:
-				state = STATE_SOL;
+		case STATE_COMMENT_OR_ERROR: switch(l) {
+			case LETTER_END_OF_LINE:
+				state = STATE_START_OF_LINE;
 				break;
 			default:
 				break;
 			} break;
-		case STATE_SOL: switch(l) {
-			case LETTER_EOL:
+		case STATE_START_OF_LINE: switch(l) {
+			case LETTER_END_OF_LINE:
 			case LETTER_WHITESPACE:
 				break;
 			case LETTER_EQUAL:
-				parser_error("option name", "=", max(lineR, lineN), lineC);
-				state = STATE_COMMENT;
+				parser_error("option name", "=", lineT, lineC);
+				state = STATE_COMMENT_OR_ERROR;
 				break;
 			case LETTER_COMMENT:
-				state = STATE_COMMENT;
+				state = STATE_COMMENT_OR_ERROR;
 				break;
 			case LETTER_LETTER:
 			default:
@@ -145,9 +159,9 @@ void parse_config(char *filename) {
 				break;
 			} break;
 		case STATE_NAME: switch(l) {
-			case LETTER_EOL:
-				parser_error("=", "end of line", max(lineR, lineN), lineC);
-				state = STATE_COMMENT;
+			case LETTER_END_OF_LINE:
+				parser_error("=", "end of line", lineT, lineC);
+				state = STATE_COMMENT_OR_ERROR;
 				break;
 			case LETTER_WHITESPACE:
 				state = STATE_PRE_EQUAL;
@@ -156,8 +170,8 @@ void parse_config(char *filename) {
 				state = STATE_POST_EQUAL;
 				break;
 			case LETTER_COMMENT:
-				parser_error("=", "comment", max(lineR, lineN), lineC);
-				state = STATE_COMMENT;
+				parser_error("=", "comment", lineT, lineC);
+				state = STATE_COMMENT_OR_ERROR;
 				break;
 			case LETTER_LETTER:
 			default:
@@ -171,14 +185,14 @@ void parse_config(char *filename) {
 				state = STATE_POST_EQUAL;
 				break;
 			default:
-				parser_error("= or more whitespace", "gibberish", max(lineR, lineN), lineC);
-				state = STATE_COMMENT;
+				parser_error("= or more whitespace", "gibberish", lineT, lineC);
+				state = STATE_COMMENT_OR_ERROR;
 				break;
 			} break;
 		case STATE_POST_EQUAL: switch(l) {
-			case LETTER_EOL:
-				parser_error("option value or more whitespace", "end of line", max(lineR, lineN), lineC);
-				state = STATE_COMMENT;
+			case LETTER_END_OF_LINE:
+				parser_error("option value or more whitespace", "end of line", lineT, lineC);
+				state = STATE_COMMENT_OR_ERROR;
 				break;
 			case LETTER_WHITESPACE:
 				break;
@@ -192,13 +206,13 @@ void parse_config(char *filename) {
 				break;
 			} break;
 		case STATE_VALUE: switch(l) {
-			case LETTER_EOL:
+			case LETTER_END_OF_LINE:
 				name = strndup((char *)config + nameStart, nameStop - nameStart + 1);
 				value = strndup((char *)config + valueStart, valueStop - valueStart + 1);
 				option_set(name, value);
 				free(name);
 				free(value);
-				state = STATE_SOL;
+				state = STATE_START_OF_LINE;
 				break;
 			case LETTER_WHITESPACE:
 			case LETTER_EQUAL:
@@ -217,13 +231,13 @@ void parse_config(char *filename) {
 	switch(state) {
 	case STATE_NAME:
 	case STATE_PRE_EQUAL:
-		parser_error("=", "end of file", max(lineR, lineN), lineC);
+		parser_error("=", "end of file", lineT, lineC);
 		break;
 	case STATE_POST_EQUAL:
-		parser_error("option value", "end of file", max(lineR, lineN), lineC);
+		parser_error("option value", "end of file", lineT, lineC);
 		break;
-	case STATE_SOL:
-	case STATE_COMMENT:
+	case STATE_START_OF_LINE:
+	case STATE_COMMENT_OR_ERROR:
 	case STATE_VALUE:
 	default:
 		/* Valid end of file location, no issue. */
