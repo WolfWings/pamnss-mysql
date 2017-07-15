@@ -9,7 +9,7 @@ MY_LDLIBS=
 # MySQL includes and libraries
 # Enforce "gnu99" C99 mode
 # Include local directory
-CFLAGS=$(MY_CFLAGS) $(shell mysql_config --cflags) -I. -std=gnu99
+CFLAGS=$(MY_CFLAGS) $(shell mysql_config --cflags) -fPIC -I. -std=gnu99
 LDLIBS=$(MY_LDLIBS) $(shell mysql_config --libs)
 LDFLAGS=$(MY_LDFLAGS)
 
@@ -25,10 +25,8 @@ config.c: config.h
 
 mysql.c: mysql.h
 
-nss.c: nss.h
-
-libnss_mysql2017.so.2: nss.c config.c parser.c mysql.c
-	gcc -fPIC -shared -o libnss_mysql2017.so.2 -Wl,-soname,libnss_mysql2017.so.2 nss.c
+libnss_mysql2017.so.2: nss.o config.o parser.o mysql.o
+	gcc -fPIC -shared -o libnss_mysql2017.so.2 -Wl,-soname,libnss_mysql2017.so.2 $<
 
 clean:
 	$(RM) *.o *.gcda *.gcno *.gcov tests/*_coverage *.so.*
