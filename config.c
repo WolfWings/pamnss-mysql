@@ -19,16 +19,24 @@ _options options = {
 ,	.db.nssuser.password = NULL
 ,	.db.nssroot.username = NULL
 ,	.db.nssroot.password = NULL
+
+,	.nss.setpwent = NULL
 ,	.nss.getpwent = NULL
-,	.nss.getpwnam = NULL
+,	.nss.endpwent = NULL
 ,	.nss.getpwuid = NULL
+,	.nss.getpwnam = NULL
+
+,	.nss.setspent = NULL
 ,	.nss.getspent = NULL
+,	.nss.endspent = NULL
 ,	.nss.getspnam = NULL
+
+,	.nss.setgrent = NULL
 ,	.nss.getgrent = NULL
-,	.nss.getgrnam = NULL
+,	.nss.endgrent = NULL
 ,	.nss.getgrgid = NULL
-,	.nss.memsbygid = NULL
-,	.nss.gidsbymem = NULL
+,	.nss.getgrnam = NULL
+
 ,	.pam.table = NULL
 ,	.pam.usernamecolumn = NULL
 ,	.pam.passwordcolumn = NULL
@@ -87,16 +95,24 @@ static _stringsearch stringsearch[] = {
 ,	{"db.pam", (void *)&options.db.pam, updatecredentials}
 ,	{"db.nssuser", (void *)&options.db.nssuser, updatecredentials}
 ,	{"db.nssroot", (void *)&options.db.nssroot, updatecredentials}
+
+,	{"nss.setpwent", (void *)&options.nss.setpwent, updatestring}
 ,	{"nss.getpwent", (void *)&options.nss.getpwent, updatestring}
+,	{"nss.endpwent", (void *)&options.nss.endpwent, updatestring}
 ,	{"nss.getpwnam", (void *)&options.nss.getpwnam, updatestring}
 ,	{"nss.getpwuid", (void *)&options.nss.getpwuid, updatestring}
+
+,	{"nss.setspent", (void *)&options.nss.setspent, updatestring}
 ,	{"nss.getspent", (void *)&options.nss.getspent, updatestring}
+,	{"nss.endspent", (void *)&options.nss.endspent, updatestring}
 ,	{"nss.getspnam", (void *)&options.nss.getspnam, updatestring}
+
+,	{"nss.setgrent", (void *)&options.nss.setgrent, updatestring}
 ,	{"nss.getgrent", (void *)&options.nss.getgrent, updatestring}
+,	{"nss.endgrent", (void *)&options.nss.endgrent, updatestring}
 ,	{"nss.getgrnam", (void *)&options.nss.getgrnam, updatestring}
 ,	{"nss.getgrgid", (void *)&options.nss.getgrgid, updatestring}
-,	{"nss.memsbygid", (void *)&options.nss.memsbygid, updatestring}
-,	{"nss.gidsbymem", (void *)&options.nss.gidsbymem, updatestring}
+
 ,	{"pam.table", (void *)&options.pam.table, updatestring}
 ,	{"pam.usernamecolumn", (void *)&options.pam.usernamecolumn, updatestring}
 ,	{"pam.passwordcolumn", (void *)&options.pam.passwordcolumn, updatestring}

@@ -16,19 +16,22 @@ typedef struct {
 	} db;
 
 	struct {
+		char *setpwent;
 		char *getpwent;
-		char *getpwnam;
+		char *endpwent;
 		char *getpwuid;
+		char *getpwnam;
 
+		char *setspent;
 		char *getspent;
+		char *endspent;
 		char *getspnam;
 
+		char *setgrent;
 		char *getgrent;
-		char *getgrnam;
+		char *endgrent;
 		char *getgrgid;
-
-		char *memsbygid;
-		char *gidsbymem;
+		char *getgrnam;
 	} nss;
 
 	struct {
