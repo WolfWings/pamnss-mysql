@@ -19,7 +19,7 @@ enum nss_status _nss_mysql2017_getpwent_r (struct passwd *pwd, char *buffer, siz
 
 enum nss_status _nss_mysql2017_endpwent (void) {
 	syslog(LOG_WARNING, "[PAMNSS-MySQL-2017] - endpwent called");
-	return NSS_STATUS_NOTFOUND;
+	return NSS_STATUS_SUCCESS;
 }
 
 enum nss_status _nss_mysql2017_getpwuid_r (uid_t uid, struct passwd *pwd, char *buffer, size_t buflen, int *errnop) {
@@ -49,7 +49,7 @@ enum nss_status _nss_mysql2017_getgrent_r (struct group *grp, char *buffer, size
 
 enum nss_status _nss_mysql2017_endgrent (void) {
 	syslog(LOG_WARNING, "[PAMNSS-MySQL-2017] - endgrent called");
-	return NSS_STATUS_NOTFOUND;
+	return NSS_STATUS_SUCCESS;
 }
 
 enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *buffer, size_t buflen, int *errnop) {
@@ -79,7 +79,7 @@ enum nss_status _nss_mysql2017_getspent_r (struct spwd *pwd, char *buffer, size_
 
 enum nss_status _nss_mysql2017_endspent (void) {
 	syslog(LOG_WARNING, "[PAMNSS-MySQL-2017] - endspent called");
-	return NSS_STATUS_NOTFOUND;
+	return NSS_STATUS_SUCCESS;
 }
 
 enum nss_status _nss_mysql2017_getspnam_r (const char *name, struct spwd *pwd, char *buffer, size_t buflen, int *errnop) {
