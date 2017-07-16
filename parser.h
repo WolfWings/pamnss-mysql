@@ -1,1 +1,1 @@
-void parse_config(char *filename);
+void config_parse(char *filename);

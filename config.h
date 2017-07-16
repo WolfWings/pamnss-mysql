@@ -11,8 +11,7 @@ typedef struct {
 		char *database;
 
 		_logincreds pam;
-		_logincreds nssuser;
-		_logincreds nssroot;
+		_logincreds nss;
 	} db;
 
 	struct {

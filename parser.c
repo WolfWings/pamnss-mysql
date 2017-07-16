@@ -58,7 +58,10 @@ static void parser_error(const char *expect, const char *got, int lineline, int 
 	}
 }
 
-void parse_config(char *filename) {
+void config_parse(char *filename) {
+	/* Prevent parsing config file multiple times. */
+	static int config_parsed = 0;
+
 	int fd
 	  , nameStart
 	  , nameStop
@@ -75,6 +78,10 @@ void parse_config(char *filename) {
 	state state;
 	letter l;
 	size_t filesize;
+
+	if (config_parsed) {
+		return;
+	}
 
 	filesize = getFilesize(filename);
 
@@ -243,6 +250,9 @@ void parse_config(char *filename) {
 		/* Valid end of file location, no issue. */
 		break;
 	}
+
+	/* Prevent parsing config file multiple times. */
+	config_parsed = !0;
 
 	/* Cleanup */
 

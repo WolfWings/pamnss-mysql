@@ -15,10 +15,8 @@ _options options = {
 ,	.db.database = NULL
 ,	.db.pam.username = NULL
 ,	.db.pam.password = NULL
-,	.db.nssuser.username = NULL
-,	.db.nssuser.password = NULL
-,	.db.nssroot.username = NULL
-,	.db.nssroot.password = NULL
+,	.db.nss.username = NULL
+,	.db.nss.password = NULL
 
 ,	.nss.setpwent = NULL
 ,	.nss.getpwent = NULL
@@ -93,8 +91,7 @@ static _stringsearch stringsearch[] = {
 	{"db.host", (void *)&options.db.host, updatestring}
 ,	{"db.database", (void *)&options.db.database, updatestring}
 ,	{"db.pam", (void *)&options.db.pam, updatecredentials}
-,	{"db.nssuser", (void *)&options.db.nssuser, updatecredentials}
-,	{"db.nssroot", (void *)&options.db.nssroot, updatecredentials}
+,	{"db.nss", (void *)&options.db.nss, updatecredentials}
 
 ,	{"nss.setpwent", (void *)&options.nss.setpwent, updatestring}
 ,	{"nss.getpwent", (void *)&options.nss.getpwent, updatestring}
