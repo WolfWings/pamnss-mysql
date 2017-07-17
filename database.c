@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <mysql.h>
-#include <syslog.h>
 #include <string.h>
+#include <syslog.h>
+
+#include <mysql.h>
 
 #include "database.h"
 #include "config.h"

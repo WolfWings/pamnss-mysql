@@ -1,47 +1,34 @@
 CREATE DATABASE IF NOT EXISTS pamnss;
 USE pamnss;
 
-# The tables ...
-CREATE TABLE grouplist (
-  rowid INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  gid SMALLINT UNSIGNED NOT NULL DEFAULT '0',
-  username VARCHAR(256) CHARACTER SET 'ascii' NOT NULL DEFAULT ''
-);
+CREATE TABLE pamnss.users (_ BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, name VARCHAR(64) UNIQUE NOT NULL, uid BIGINT UNSIGNED NOT NULL, gid BIGINT UNSIGNED NOT NULL, gecos VARCHAR(255), homedir VARCHAR(255) NOT NULL, shell VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, lastpwchange DATETIME, flags BIGINT UNSIGNED NOT NULL, INDEX (uid), INDEX (gid), INDEX(password)) CHARACTER SET 'ASCII';
 
-# Force UID/GID to match for SQL-authed users
 CREATE TABLE users (
-  uidgid SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(256) CHARACTER SET 'ascii' NOT NULL DEFAULT '' UNIQUE,
-  homedir VARCHAR(255) CHARACTER SET 'ascii' NOT NULL DEFAULT '',
-  shell VARCHAR(255) CHARACTER SET 'ascii' NOT NULL DEFAULT '/bin/bash',
-  password VARCHAR(110) CHARACTER SET 'ascii' NOT NULL DEFAULT 'x',
-  flag BIGINT UNSIGNED NOT NULL DEFAULT '0'
-) AUTO_INCREMENT = 5000;
+  _ BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(64) UNIQUE NOT NULL,
+  UID BIGINT UNSIGNED NOT NULL,
+  gid BIGINT UNSIGNED NOT NULL,
+  gecos VARCHAR(255),
+  homedir VARCHAR(255) NOT NULL,
+  shell VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  lastpwchange DATETIME,
+  flags BIGINT UNSIGNED NOT NULL,
+  INDEX (UID),
+  INDEX (gid),
+  INDEX(password)
+) CHARACTER SET 'ASCII';
 
-# The data ...
-INSERT INTO users (name,homedir,password) VALUES ('sqltest','/dev/null',ENCRYPT('sqltest','$6$AAAAAAAAAAAAAAAA'));
-INSERT INTO grouplist (gid,username) VALUES(5000,'sqltest');
+CREATE TABLE group (
+  _ BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(64) UNIQUE NOT NULL,
+  gid BIGINT UNSIGNED NOT NULL,
+  members VARBINARY(248) NOT NULL,
+  INDEX (gid)
+) CHARACTER SET 'ASCII';
 
-# The permissions ...
-GRANT USAGE ON *.* TO `pam-root`@`%` IDENTIFIED BY 'password';
-GRANT USAGE ON *.* TO `nss-root`@`%` IDENTIFIED BY 'password';
-GRANT USAGE ON *.* TO `nss-user`@`%` IDENTIFIED BY 'password';
+GRANT SELECT (_,name,uid,gid,gecos,homedir,shell) ON pamnss.users TO 'nss-user'@localhost
+GRANT SELECT ON pamnss.group TO 'nss-user'@localhost;
 
-GRANT SELECT (`name`, `password`)
-             ON `pamnss`.`users`
-             TO 'pam-root'@'%';
-
-GRANT SELECT (`name`, `uidgid`, `uidgid`, `homedir`, `shell`, `password`,
-              `lastchanged`, `min`, `max`, `warn`, `graceperiod`, `expire`, `flag`)
-             ON `pamnss`.`users`
-             TO 'nss-root'@'%';
-GRANT SELECT (`username`, `gid`)
-             ON `pamnss`.`grouplist`
-             TO 'nss-root'@'%';
-
-GRANT SELECT (`name`, `uidgid`, `uidgid`, `homedir`, `shell`)
-             ON `pamnss`.`users`
-             TO 'nss-user'@'%';
-GRANT SELECT (`username`, `gid`)
-             ON `pamnss`.`grouplist`
-             TO 'nss-user'@'%';
+GRANT SELECT ON pamnss.users TO 'nss-root'@localhost;
+GRANT SELECT ON pamnss.group TO 'nss-root'@localhost;
