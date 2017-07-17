@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <errno.h>
+#include <syslog.h>
 
 #include "config.h"
 
@@ -40,22 +42,8 @@ static size_t getFilesize(const char* filename) {
 	return st.st_size;
 }
 
-static char _parser_error_buffer[1024];
 static void parser_error(const char *expect, const char *got, int lineline, int linechar) {
-	// Compute the total bytes written INCLUDING the nul
-	// Uses 'min' to cap things at the buffer length
-	int written = min(1 + snprintf(_parser_error_buffer, 1024,
-		"Expected %s but got %s at line %i, character %i\n",
-		expect, got, lineline, linechar), 1024);
-
-	// As we're already in error handling, silently 'eat' errors
-	if (written > 0) {
-		// ...if we write without issue...
-		if (write(STDERR_FILENO, _parser_error_buffer, written) != -1) {
-			// ...flush the data to be seen...
-			fsync(STDERR_FILENO);
-		}
-	}
+	syslog(LOG_WARNING, "PAMNSS-MySQL-2017: Expected %s but got %s at line %i, character %i", expect, got, lineline, linechar);
 }
 
 void config_parse(char *filename) {
@@ -88,8 +76,15 @@ void config_parse(char *filename) {
 	/* Open file */
 	fd = open(filename, O_RDONLY, 0);
 	if (fd == -1) {
-		parser_error("readable file", "unreadable file", -1, -1);
-		goto abort_open;
+		/* Do not throw an error on EACCES, to allow blindly reading
+		 * the 'global' followed by the 'root only' configurations to
+		 * simplify overall code.
+		 */
+		if (errno != EACCES) {
+			parser_error("readable file", "unreadable file", -1, -1);
+		}
+
+		return;
 	}
 
 	/* Execute mmap */
@@ -260,7 +255,4 @@ void config_parse(char *filename) {
 
 abort_mmap:
 	close(fd);
-
-abort_open:
-	return;
 }
