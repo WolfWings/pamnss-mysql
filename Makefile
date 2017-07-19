@@ -27,7 +27,7 @@ config.c: config.h
 
 database.c: database.h config.h parser.h banners.h
 
-libnss.c: banners.h
+libnss.c: banners.h config.h database.h
 
 libnss_mysql2017.so.2: $(NSS_OBJS)
 	gcc -fPIC -shared -o libnss_mysql2017.so.2 -Wl,-soname,libnss_mysql2017.so.2 $(NSS_OBJS)
