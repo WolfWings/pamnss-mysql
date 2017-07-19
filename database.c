@@ -53,7 +53,7 @@ int db_read(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
 		return -1;
 	}
 
-	if (mysql_stmt_prepare(_mysql_stmt, query, strlen(query)) != 0) {
+	if (mysql_stmt_prepare(_mysql_stmt, query, strlen(query) + 1) != 0) {
 		mysql_stmt_close(_mysql_stmt);
 		finish_with_error(LOG_ERR, "Failed to prepare MySQL statement");
 		return -1;
