@@ -8,17 +8,16 @@
 #include "database.h"
 #include "config.h"
 #include "parser.h"
+#include "banners.h"
 
 static MYSQL *_mysql_con = NULL;
 static MYSQL_STMT *_mysql_stmt = NULL;
 
-static char *banner = "PAMNSS-MySQL-2017";
-
 static void finish_with_error(int priority, const char *message) {
 	if (_mysql_con == NULL) {
-		syslog(priority, "%s: %s", banner, message);
+		syslog(priority, "%s: %s", syslog_banner, message);
 	} else {
-		syslog(priority, "%s: %s: %s", banner, message, mysql_error(_mysql_con));
+		syslog(priority, "%s: %s: %s", syslog_banner, message, mysql_error(_mysql_con));
 		mysql_close(_mysql_con);
 		free(_mysql_con);
 		_mysql_con = NULL;

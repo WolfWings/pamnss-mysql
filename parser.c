@@ -9,6 +9,7 @@
 #include <syslog.h>
 
 #include "config.h"
+#include "banners.h"
 
 #ifndef max
 #define max(a, b) ((a > b) ? a : b)
@@ -43,13 +44,13 @@ static size_t getFilesize(const char* filename) {
 }
 
 static void parser_error(const char *expect, const char *got, int lineline, int linechar) {
-	syslog(LOG_WARNING, "PAMNSS-MySQL-2017: Expected %s but got %s at line %i, character %i", expect, got, lineline, linechar);
+	syslog(LOG_WARNING, "%s: Expected %s but got %s at line %i, character %i", syslog_banner, expect, got, lineline, linechar);
 }
 
-void config_parse(char *filename) {
-	/* Prevent parsing config file multiple times. */
-	static int config_parsed = 0;
+/* Prevent parsing config file multiple times. */
+int config_parsed = 0;
 
+void config_parse(char *filename) {
 	int fd
 	  , nameStart
 	  , nameStop
@@ -96,7 +97,7 @@ void config_parse(char *filename) {
 
 	name = value = NULL;
 	nameStart = nameStop = valueStart = valueStop = pos = 0;
-	lineR = lineN = lineC = 1;
+	lineR = lineN = lineC = lineT = 1;
 	state = STATE_START_OF_LINE;
 	do {
 		switch(config[pos]) {

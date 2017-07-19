@@ -1,21 +1,24 @@
 #!/bin/bash
 EXE=tests/parser_coverage
+if [ -x $(which valgrind) ]; then
+	EXE="$(which valgrind) --leak-check=yes ${EXE}"
+fi
 
-# Run through the itemized test files first
-for CFG in tests/parser/*.cfg ./; do
-	${EXE} ${CFG} 2>&1 > /dev/null
-done
-
-# Now create a file we can't read...
+# Create a file we can't read...
 OLDUMASK=$(umask)
 umask -- -r
 TEMPFILE=$(mktemp)
 umask ${OLDUMASK}
-${EXE} ${TEMPFILE} 2>&1 > /dev/null
-rm -f ${TEMPFILE}
 
-# ...and test again for the missing option
-${EXE} ${TEMPFILE} 2>&1 > /dev/null
+# ...and a file that doesn't exist...
+MISSINGFILE=$(mktemp)
+rm -f ${MISSINGFILE}
+
+# ...and run all the tests.
+${EXE} tests/parser/*.cfg ${TEMPFILE} ${MISSINGFILE} 2>&1 > /dev/null
+
+# Safe to purge the unreadable file now.
+rm -f ${TEMPFILE}
 
 # Output the GCOV counts.
 gcov config.c parser.c
