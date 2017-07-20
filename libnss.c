@@ -10,6 +10,7 @@
 #include "database.h"
 #include "banners.h"
 #include "config.h"
+#include "parser.h"
 
 /* /etc/passwd coverage */
 
@@ -84,6 +85,9 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 
 	syslog(LOG_DEBUG, "%s: getgrgid_r called with gid [%i]", syslog_banner, gid);
 
+	/* Make sure config files have been loaded */
+	config_load();
+
 	if (options.nss.getgrgid == NULL) {
 		*errnop = 0;
 		return NSS_STATUS_NOTFOUND;
@@ -114,7 +118,15 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 	binds[3].length = &members_out_length;
 
 	switch ( db_read(options.nss.getgrgid, &binds[0], &binds[1]) ) {
-		case 1:
+		case -1:
+			*errnop = ENOENT;
+			return NSS_STATUS_NOTFOUND;
+			break;
+		case 0:
+			*errnop = 0;
+			return NSS_STATUS_NOTFOUND;
+			break;
+		default:
 			*errnop = 0;
 			grp->gr_name = strndup(name_out, sizeof(name_out));
 			grp->gr_passwd = password_see_shadow;
@@ -122,16 +134,7 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 			grp->gr_mem = &empty_array;
 			return NSS_STATUS_SUCCESS;
 			break;
-		case 0:
-			*errnop = 0;
-			return NSS_STATUS_NOTFOUND;
-			break;
-		default:
-			*errnop = ENOENT;
-			return NSS_STATUS_NOTFOUND;
-			break;
 	}
-
 }
 
 enum nss_status _nss_mysql2017_getgrnam_r (const char *name, struct group *grp, char *buffer, size_t buflen, int *errnop) {
