@@ -28,9 +28,6 @@ int db_read(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
 	int rows;
 	int fetch;
 
-	config_parse("/etc/pamnss-mysql/global.conf");
-	config_parse("/etc/pamnss-mysql/root.conf");
-
 	/* Make sure we have a valid database connection. */
 	if (_mysql_con == NULL) {
 		_mysql_con = mysql_init(NULL);

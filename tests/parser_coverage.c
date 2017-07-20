@@ -23,17 +23,12 @@ static void _free(void **p) {
 
 int main(int argc, char **argv) {
 	int i;
+
 	for (i = 1; i < argc; i++) {
-		config_parsed = 0;
 		config_parse(argv[i]);
 	}
 
-	/* Test the config_parsed early-abort. */
-	/* Requires the first argument to pass */
-	if (argc > 1) {
-		config_parse(argv[1]);
-		config_parse(argv[1]);
-	}
+	config_load();
 
 	_free((void *)&options.db.host);
 	_free((void *)&options.db.database);

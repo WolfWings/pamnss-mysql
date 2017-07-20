@@ -47,9 +47,6 @@ static void parser_error(const char *expect, const char *got, int lineline, int 
 	syslog(LOG_WARNING, "%s: Expected %s but got %s at line %i, character %i", syslog_banner, expect, got, lineline, linechar);
 }
 
-/* Prevent parsing config file multiple times. */
-int config_parsed = 0;
-
 void config_parse(char *filename) {
 	int fd
 	  , nameStart
@@ -67,10 +64,6 @@ void config_parse(char *filename) {
 	state state;
 	letter l;
 	size_t filesize;
-
-	if (config_parsed) {
-		return;
-	}
 
 	filesize = getFilesize(filename);
 
@@ -247,13 +240,21 @@ void config_parse(char *filename) {
 		break;
 	}
 
-	/* Prevent parsing config file multiple times. */
-	config_parsed = !0;
-
 	/* Cleanup */
 
 	munmap(config, filesize);
 
 abort_mmap:
 	close(fd);
+}
+
+void config_load(void) {
+	/* Prevent parsing config file multiple times. */
+	static int config_parsed = 0;
+
+	if (config_parsed == 0) {
+		config_parse("/etc/pamnss-mysql/global.conf");
+		config_parse("/etc/pamnss-mysql/root.conf");
+		config_parsed = 1;
+	}
 }
