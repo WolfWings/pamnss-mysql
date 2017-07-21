@@ -18,8 +18,13 @@ char *password_see_shadow = "x";
 
 char *empty_array = NULL;
 
+static int pwent_line = 0;
+
 enum nss_status _nss_mysql2017_setpwent (int stayopen) {
 	syslog(LOG_DEBUG, "%s: setpwent called", syslog_banner);
+
+	pwent_line = 0;
+
 	return NSS_STATUS_SUCCESS;
 }
 
@@ -48,8 +53,13 @@ enum nss_status _nss_mysql2017_getpwnam_r (const char *name, struct passwd *pwd,
 
 /* /etc/group coverage */
 
+static int grent_line = 0;
+
 enum nss_status _nss_mysql2017_setgrent (int stayopen) {
 	syslog(LOG_DEBUG, "%s: setgrent called", syslog_banner);
+
+	grent_line = 0;
+
 	return NSS_STATUS_SUCCESS;
 }
 
@@ -144,8 +154,13 @@ enum nss_status _nss_mysql2017_getgrnam_r (const char *name, struct group *grp, 
 
 /* /etc/shadow coverage */
 
+static int spent_line = 0;
+
 enum nss_status _nss_mysql2017_setspent (int stayopen) {
 	syslog(LOG_DEBUG, "%s: setspent called", syslog_banner);
+
+	spent_line = 0;
+
 	return NSS_STATUS_SUCCESS;
 }
 
