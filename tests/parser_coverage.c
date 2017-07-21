@@ -39,22 +39,16 @@ int main(int argc, char **argv) {
 	_free((void *)&options.db.nss.username);
 	_free((void *)&options.db.nss.password);
 
-	_free((void *)&options.nss.setpwent);
 	_free((void *)&options.nss.getpwent);
-	_free((void *)&options.nss.endpwent);
-	_free((void *)&options.nss.getpwuid);
 	_free((void *)&options.nss.getpwnam);
+	_free((void *)&options.nss.getpwuid);
 
-	_free((void *)&options.nss.setspent);
 	_free((void *)&options.nss.getspent);
-	_free((void *)&options.nss.endspent);
 	_free((void *)&options.nss.getspnam);
 
-	_free((void *)&options.nss.setgrent);
 	_free((void *)&options.nss.getgrent);
-	_free((void *)&options.nss.endgrent);
-	_free((void *)&options.nss.getgrgid);
 	_free((void *)&options.nss.getgrnam);
+	_free((void *)&options.nss.getgrgid);
 
 	_free((void *)&options.pam.table);
 	_free((void *)&options.pam.usernamecolumn);

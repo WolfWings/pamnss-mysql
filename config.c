@@ -18,22 +18,16 @@ _options options = {
 ,	.db.nss.username = NULL
 ,	.db.nss.password = NULL
 
-,	.nss.setpwent = NULL
 ,	.nss.getpwent = NULL
-,	.nss.endpwent = NULL
-,	.nss.getpwuid = NULL
 ,	.nss.getpwnam = NULL
+,	.nss.getpwuid = NULL
 
-,	.nss.setspent = NULL
 ,	.nss.getspent = NULL
-,	.nss.endspent = NULL
 ,	.nss.getspnam = NULL
 
-,	.nss.setgrent = NULL
 ,	.nss.getgrent = NULL
-,	.nss.endgrent = NULL
-,	.nss.getgrgid = NULL
 ,	.nss.getgrnam = NULL
+,	.nss.getgrgid = NULL
 
 ,	.pam.table = NULL
 ,	.pam.usernamecolumn = NULL
@@ -93,20 +87,14 @@ static _stringsearch stringsearch[] = {
 ,	{"db.pam", (void *)&options.db.pam, updatecredentials}
 ,	{"db.nss", (void *)&options.db.nss, updatecredentials}
 
-,	{"nss.setpwent", (void *)&options.nss.setpwent, updatestring}
 ,	{"nss.getpwent", (void *)&options.nss.getpwent, updatestring}
-,	{"nss.endpwent", (void *)&options.nss.endpwent, updatestring}
 ,	{"nss.getpwnam", (void *)&options.nss.getpwnam, updatestring}
 ,	{"nss.getpwuid", (void *)&options.nss.getpwuid, updatestring}
 
-,	{"nss.setspent", (void *)&options.nss.setspent, updatestring}
 ,	{"nss.getspent", (void *)&options.nss.getspent, updatestring}
-,	{"nss.endspent", (void *)&options.nss.endspent, updatestring}
 ,	{"nss.getspnam", (void *)&options.nss.getspnam, updatestring}
 
-,	{"nss.setgrent", (void *)&options.nss.setgrent, updatestring}
 ,	{"nss.getgrent", (void *)&options.nss.getgrent, updatestring}
-,	{"nss.endgrent", (void *)&options.nss.endgrent, updatestring}
 ,	{"nss.getgrnam", (void *)&options.nss.getgrnam, updatestring}
 ,	{"nss.getgrgid", (void *)&options.nss.getgrgid, updatestring}
 
