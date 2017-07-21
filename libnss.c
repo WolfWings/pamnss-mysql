@@ -81,10 +81,9 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 	/*
 	 * 0 - GID integer
 	 * 1 - Name
-	 * 2 - GID
-	 * 3 - Members
+	 * 2 - Members
 	 */
-	MYSQL_BIND binds[4];
+	MYSQL_BIND binds[3];
 	my_bool bind_nulls[4];
 	unsigned long long int gid_in;
 	char name_out[256];
@@ -116,11 +115,6 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 	binds[1].buffer_length = 256;
 	binds[1].length = &name_out_length;
 
-	binds[2].buffer_type = MYSQL_TYPE_LONGLONG;
-	binds[2].buffer = &gid_out;
-	binds[2].buffer_length = 8;
-	binds[2].is_null = &bind_nulls[2];
-
 	binds[3].buffer_type = MYSQL_TYPE_STRING;
 	binds[3].buffer = &members_out;
 	binds[3].buffer_length = 256;
@@ -139,7 +133,7 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 			*errnop = 0;
 			grp->gr_name = strndup(name_out, sizeof(name_out));
 			grp->gr_passwd = password_see_shadow;
-			grp->gr_gid = gid_out;
+			grp->gr_gid = gid;
 			grp->gr_mem = &empty_array;
 			return NSS_STATUS_SUCCESS;
 			break;
