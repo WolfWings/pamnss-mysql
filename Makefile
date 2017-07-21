@@ -17,9 +17,12 @@ NSS_OBJS=libnss.o config.o parser.o database.o banners.o
 
 default: libnss_mysql2017.so.2
 
-tests: tests/parser_coverage
+tests: tests/parser_coverage tests/preload_silence_syslog.so
 
 tests/parser_coverage: parser.o config.o tests/parser_coverage.c banners.o
+
+tests/preload_silence_syslog.so: tests/preload_silence_syslog.c
+	gcc -fPIC -shared -o tests/preload_silence_syslog.so tests/preload_silence_syslog.c -ldl
 
 parser.c: parser.h config.h banners.h
 

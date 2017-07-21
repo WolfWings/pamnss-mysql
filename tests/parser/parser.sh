@@ -15,7 +15,7 @@ MISSINGFILE=$(mktemp)
 rm -f ${MISSINGFILE}
 
 # ...and run all the tests.
-${EXE} tests/parser/*.cfg ${TEMPFILE} ${MISSINGFILE} 2>&1 > /dev/null
+LD_PRELOAD=tests/preload_silence_syslog.so ${EXE} tests/parser/*.cfg ${TEMPFILE} ${MISSINGFILE} 2>&1 > /dev/null
 
 # Safe to purge the unreadable file now.
 rm -f ${TEMPFILE}
