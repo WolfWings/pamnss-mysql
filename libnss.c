@@ -115,10 +115,10 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 	binds[1].buffer_length = 256;
 	binds[1].length = &name_out_length;
 
-	binds[3].buffer_type = MYSQL_TYPE_STRING;
-	binds[3].buffer = &members_out;
-	binds[3].buffer_length = 256;
-	binds[3].length = &members_out_length;
+	binds[2].buffer_type = MYSQL_TYPE_STRING;
+	binds[2].buffer = &members_out;
+	binds[2].buffer_length = 256;
+	binds[2].length = &members_out_length;
 
 	switch ( db_read(options.nss.getgrgid, &binds[0], &binds[1]) ) {
 		case -1:

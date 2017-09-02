@@ -36,4 +36,4 @@ libnss_mysql2017.so.2: $(NSS_OBJS)
 	gcc -fPIC -shared -o libnss_mysql2017.so.2 -Wl,-soname,libnss_mysql2017.so.2 $(NSS_OBJS)
 
 clean:
-	$(RM) *.o *.gcda *.gcno *.gcov tests/*_coverage *.so.*
+	$(RM) *.o *.gcda *.gcno *.gcov tests/*_coverage tests/*.so *.so.*
