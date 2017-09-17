@@ -12,6 +12,7 @@
 
 static MYSQL *_mysql_con = NULL;
 static MYSQL_STMT *_mysql_stmt = NULL;
+static int _fetch;
 
 static void finish_with_error(int priority, const char *message) {
 	if (_mysql_con == NULL) {
@@ -24,10 +25,7 @@ static void finish_with_error(int priority, const char *message) {
 	}
 }
 
-int db_read(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
-	int rows;
-	int fetch;
-
+int db_read_open(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
 	/* Make sure we have a valid database connection. */
 	if (_mysql_con == NULL) {
 		_mysql_con = mysql_init(NULL);
@@ -73,12 +71,26 @@ int db_read(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
 		return -1;
 	}
 
-	fetch = mysql_stmt_fetch(_mysql_stmt);
-	if (fetch == 1) {
-		mysql_stmt_close(_mysql_stmt);
-		finish_with_error(LOG_ERR, "Failed to fetch prepared MySQL statement result");
-		return -1;
+	return 0;
+}
+
+int db_read_fetch() {
+	_fetch = mysql_stmt_fetch(_mysql_stmt);
+	switch(_fetch) {
+		case 1:
+			mysql_stmt_close(_mysql_stmt);
+			finish_with_error(LOG_ERR, "Failed to fetch prepared MySQL statement result");
+			return -1;
+			break;
+		case MYSQL_NO_DATA:
+			return 0;
+		default:
+			return 1;
 	}
+}
+
+int db_read_close() {
+	int rows;
 
 	rows = mysql_stmt_affected_rows(_mysql_stmt);
 	mysql_stmt_close(_mysql_stmt);
@@ -86,7 +98,8 @@ int db_read(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
 	if (rows < 0) {
 		/* Only LOG_WARNING as we have successfully fetched SOMETHING. */
 		finish_with_error(LOG_WARNING, "Problem fetching number of rows from prepared MySQL statement");
-		if (fetch == MYSQL_NO_DATA) {
+
+		if (_fetch == MYSQL_NO_DATA) {
 			return 0;
 		} else {
 			return 1;
@@ -94,4 +107,10 @@ int db_read(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
 	}
 
 	return rows;
+}
+
+int db_read_single(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
+	db_read_open(query, params, results);
+	db_read_fetch();
+	return db_read_close();
 }

@@ -53,12 +53,12 @@ enum nss_status _nss_mysql2017_getpwnam_r (const char *name, struct passwd *pwd,
 
 /* /etc/group coverage */
 
-static int grent_line = 0;
+static int grent_cursor = 0;
 
 enum nss_status _nss_mysql2017_setgrent (int stayopen) {
 	syslog(LOG_DEBUG, "%s: setgrent called", syslog_banner);
 
-	grent_line = 0;
+	grent_cursor = 0;
 
 	return NSS_STATUS_SUCCESS;
 }
@@ -120,7 +120,7 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 	binds[2].buffer_length = 256;
 	binds[2].length = &members_out_length;
 
-	switch ( db_read(options.nss.getgrgid, &binds[0], &binds[1]) ) {
+	switch ( db_read_single(options.nss.getgrgid, &binds[0], &binds[1]) ) {
 		case -1:
 			*errnop = ENOENT;
 			return NSS_STATUS_NOTFOUND;
