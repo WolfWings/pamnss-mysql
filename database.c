@@ -110,7 +110,11 @@ int db_read_close() {
 }
 
 int db_read_single(const char *query, MYSQL_BIND *params, MYSQL_BIND *results) {
-	db_read_open(query, params, results);
-	db_read_fetch();
+	if (db_read_open(query, params, results) == -1) {
+		return -1;
+	}
+	if (db_read_fetch() == -1) {
+		return -1;
+	}
 	return db_read_close();
 }
