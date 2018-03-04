@@ -84,7 +84,7 @@ enum nss_status _nss_mysql2017_getgrgid_r (gid_t gid, struct group *grp, char *b
 	 * 2 - Members
 	 */
 	MYSQL_BIND binds[3];
-	my_bool bind_nulls[4];
+	my_bool bind_nulls[3];
 	unsigned long long int gid_in;
 	char name_out[256];
 	unsigned long name_out_length;
